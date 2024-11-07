@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot Interface</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+      }
+      #chat-container {
+        width: 400px;
+        max-width: 90%;
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      #chat-display {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-bottom: 10px;
+        background: #f9f9f9;
+      }
+      .message {
+        margin: 5px 0;
+      }
+      .user-message {
+        color: #007bff;
+        text-align: right;
+      }
+      .bot-response {
+        color: #333;
+        text-align: left;
+      }
+      #user-input {
+        width: calc(100% - 60px);
+        padding: 10px;
+      }
+      #send-btn {
+        padding: 10px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chat-container">
+      <div id="chat-display"></div>
+      <input type="text" id="user-input" placeholder="Type your message..." />
+      <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+      document
+        .getElementById("send-btn")
+        .addEventListener("click", function () {
+          const userInput = document.getElementById("user-input").value;
+          if (userInput.trim() === "") return;
+
+          // Display user's message in the chat display
+          displayMessage(userInput, "user-message");
+
+          // Send the message to the Flask backend
+          fetch("http://127.0.0.1:5000/chat", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: userInput }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              // Display chatbot's response in the chat display
+              displayMessage(data.response, "bot-response");
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              displayMessage("Sorry, something went wrong.", "bot-response");
+            });
+
+          // Clear the input field
+          document.getElementById("user-input").value = "";
+        });
+
+      function displayMessage(text, className) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${className}`;
+        messageDiv.textContent = text;
+        document.getElementById("chat-display").appendChild(messageDiv);
+
+        // Scroll to the latest message
+        document.getElementById("chat-display").scrollTop =
+          document.getElementById("chat-display").scrollHeight;
+      }
+    </script>
+  </body>
+</html>
