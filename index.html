@@ -5,60 +5,161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chatbot Interface</title>
     <style>
+      #chat-container {
+        width: 800px;
+        max-width: 90%;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column; /* Allow it to take up full available space */
+        max-height: 600px; /* Limit the maximum height of the chat container */
+      }
+
+      #chat-display {
+        flex-grow: 1; /* Allows chat display to take up available space */
+        padding: 15px;
+        /* background: #f4f4f4; */
+        overflow-y: auto; /* Scrolls when the content overflows */
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 100%; /* Ensures the chat display area doesn't exceed its parent container */
+      }
+
+      #input-container {
+        display: flex;
+        padding: 10px;
+        border-top: 2px solid black;
+        height: 60px; /* Fixed height for the input and button section */
+        box-sizing: border-box;
+      }
+
+      #user-input {
+        font-family: "Times New Roman", Times, serif;
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        color: white;
+        border-radius: 5px;
+        margin-right: 10px;
+        font-size: 16px;
+      }
+
+      #send-btn {
+        font-family: "Times New Roman", Times, serif;
+        padding: 10px 15px;
+        background: #3c2d57;
+        color: white;
+        border: 2px solid antiquewhite;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      #send-btn:hover {
+        background-color: #0056b3;
+      }
+
       body {
-        font-family: Arial, sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-color: #f4f4f4;
+        background: linear-gradient(135deg, #6dd5fa, #2980b9);
+        background: linear-gradient(135deg, #f8b6d2, #a1c4fd);
+        margin: 0;
+        flex-direction: column;
       }
-      #chat-container {
-        width: 400px;
-        max-width: 90%;
-        background: #fff;
-        border: 1px solid #ddd;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      }
-      #chat-display {
-        height: 300px;
-        overflow-y: auto;
-        border: 1px solid #ddd;
-        padding: 10px;
-        margin-bottom: 10px;
-        background: #f9f9f9;
+
+      #header {
+        font-family: "Times New Roman", Times, serif;
+        background-color: #3c2d57;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        margin-bottom: 2px;
+        font-size: 18px;
+        font-weight: bold;
       }
       .message {
-        margin: 5px 0;
+        font-family: "Times New Roman", Times, serif;
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 15px;
+        max-width: 70%;
+        word-wrap: break-word;
       }
       .user-message {
-        color: #007bff;
-        text-align: right;
+        font-family: "Times New Roman", Times, serif;
+        background-color: #3c2d57;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 0;
       }
       .bot-response {
+        font-family: "Times New Roman", Times, serif;
+        background-color: #e0e0e0;
         color: #333;
-        text-align: left;
+        align-self: flex-start;
+        border-bottom-left-radius: 0;
       }
-      #user-input {
-        width: calc(100% - 60px);
-        padding: 10px;
+
+      #typing-indicator {
+        font-family: "Times New Roman", Times, serif;
+        color: #888;
+        font-style: italic;
+        display: none;
+        margin-bottom: 5px;
+        padding-left: 5%;
       }
-      #send-btn {
-        padding: 10px;
-        background: #007bff;
-        color: #fff;
-        border: none;
-        cursor: pointer;
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px); /* Start position slightly below */
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0); /* End position at normal position */
+        }
+      }
+
+      .message.bot-response {
+        animation: slideUp 0.5s ease-out; /* Apply slide-up animation */
+      }
+      .bgheader {
+        font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        margin-bottom: 20px; /* Add space between header and chat container */
+      }
+      input {
+        background-color: #3c2d57;
+        color: white;
       }
     </style>
   </head>
   <body>
+    <div id="bgheader">
+      <h1>Customer Service Chatbot</h1>
+    </div>
+
     <div id="chat-container">
-      <div id="chat-display"></div>
-      <input type="text" id="user-input" placeholder="Type your message..." />
-      <button id="send-btn">Send</button>
+      <div id="header">Customer Service Chatbot</div>
+      <div id="chat-display">
+        <!-- Chat messages will be displayed here -->
+      </div>
+      <div id="typing-indicator">Chatbot is typing...</div>
+      <div id="input-container">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Type your message..."
+          autofocus
+        />
+        <button id="send-btn">Send</button>
+      </div>
     </div>
 
     <script>
@@ -68,10 +169,20 @@
           const userInput = document.getElementById("user-input").value;
           if (userInput.trim() === "") return;
 
-          // Display user's message in the chat display
+          // Disable the input field and send button to prevent multiple clicks
+          document.getElementById("user-input").disabled = true;
+          document.getElementById("send-btn").disabled = true;
+
+          // Display user message
           displayMessage(userInput, "user-message");
 
-          // Send the message to the Flask backend
+          // Show typing indicator from chatbot
+          const typingIndicator = displayMessage(
+            "Chatbot is typing...",
+            "bot-typing"
+          );
+
+          // Fetching the response from the backend
           fetch("http://127.0.0.1:5000/chat", {
             method: "POST",
             headers: {
@@ -79,18 +190,41 @@
             },
             body: JSON.stringify({ message: userInput }),
           })
-            .then((response) => response.json())
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+              return response.json();
+            })
             .then((data) => {
-              // Display chatbot's response in the chat display
-              displayMessage(data.response, "bot-response");
+              // Simulate a 3-second delay before showing the bot response
+              setTimeout(() => {
+                // Remove the typing indicator
+                typingIndicator.remove();
+
+                // Display the actual bot response
+                displayMessage(data.response, "bot-response");
+              }, 1000); // 3 seconds delay
             })
             .catch((error) => {
               console.error("Error:", error);
-              displayMessage("Sorry, something went wrong.", "bot-response");
-            });
+              typingIndicator.remove(); // Remove typing indicator if there's an error
+              displayMessage(
+                "Sorry, something went wrong. Please try again later.",
+                "bot-response"
+              );
+            })
+            .finally(() => {
+              // Re-enable the input field and send button once the response is received
+              document.getElementById("user-input").disabled = false;
+              document.getElementById("send-btn").disabled = false;
 
-          // Clear the input field
-          document.getElementById("user-input").value = "";
+              // Focus back on the input field after the bot response
+              document.getElementById("user-input").focus();
+
+              // Clear the input field
+              document.getElementById("user-input").value = "";
+            });
         });
 
       function displayMessage(text, className) {
@@ -98,11 +232,17 @@
         messageDiv.className = `message ${className}`;
         messageDiv.textContent = text;
         document.getElementById("chat-display").appendChild(messageDiv);
-
-        // Scroll to the latest message
         document.getElementById("chat-display").scrollTop =
           document.getElementById("chat-display").scrollHeight;
+        return messageDiv; // Return the message div for manipulation (e.g., removing the typing indicator)
       }
+      document
+        .getElementById("user-input")
+        .addEventListener("keydown", function (event) {
+          if (event.key === "Enter") {
+            document.getElementById("send-btn").click();
+          }
+        });
     </script>
   </body>
 </html>
