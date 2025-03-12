@@ -29,7 +29,7 @@ greetings = [
     "greetings",
     "hi there",
     "hey there",
-    "hello there",
+    "hi and hello",
     "how’s it going?",
     "what’s new?",
     "nice to meet you",
